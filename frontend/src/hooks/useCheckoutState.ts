@@ -13,7 +13,7 @@ export const useCheckoutState = () => {
     address1: '',
     address2: '',
     city: '',
-    state: '',
+    province: '',
     postalCode: '',
     country: '',
     notes: ''

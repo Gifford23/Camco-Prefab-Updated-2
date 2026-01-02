@@ -1,6 +1,5 @@
-
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
@@ -25,7 +24,7 @@ const MultiStepCheckout = ({ product }: MultiStepCheckoutProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { addNewOrder } = useOrders();
-  
+
   const {
     currentStep,
     customerInfo,
@@ -35,20 +34,33 @@ const MultiStepCheckout = ({ product }: MultiStepCheckoutProps) => {
     handlePaymentInfoChange,
     handleContractInfoChange,
     handleNext,
-    handlePrevious
+    handlePrevious,
   } = useCheckoutState();
 
   // Get product from URL params if not provided as prop
-  const currentProduct = product || (id ? products.find(p => p.id === parseInt(id)) : null);
+  const currentProduct =
+    product || (id ? products.find((p) => p.id === parseInt(id)) : null);
 
   if (!currentProduct) {
     return <div>Product not found</div>;
   }
 
   const steps = [
-    { number: 1, title: "Customer Information", description: "Personal and delivery details" },
-    { number: 2, title: "Payment & Location", description: "Upload documents and location" },
-    { number: 3, title: "Contract & Finalize", description: "Review and sign contract" }
+    {
+      number: 1,
+      title: "Customer Information",
+      description: "Personal and delivery details",
+    },
+    {
+      number: 2,
+      title: "Payment & Location",
+      description: "Upload documents and location",
+    },
+    {
+      number: 3,
+      title: "Contract & Finalize",
+      description: "Review and sign contract",
+    },
   ];
 
   const progress = (currentStep / steps.length) * 100;
@@ -60,7 +72,7 @@ const MultiStepCheckout = ({ product }: MultiStepCheckoutProps) => {
       email: customerInfo.email,
       address: customerInfo.address1,
       city: customerInfo.city,
-      state: customerInfo.state,
+      state: customerInfo.province,
       zipCode: customerInfo.postalCode,
     };
 
@@ -78,10 +90,15 @@ const MultiStepCheckout = ({ product }: MultiStepCheckoutProps) => {
       title: "Order placed successfully!",
       description: `Order #${newOrder.id} has been created. You will receive a confirmation email shortly.`,
     });
-    navigate('/order-history');
+    navigate("/order-history");
   };
 
-  const stepValid = isStepValid(currentStep, customerInfo, paymentInfo, contractInfo);
+  const stepValid = isStepValid(
+    currentStep,
+    customerInfo,
+    paymentInfo,
+    contractInfo
+  );
 
   return (
     <div className="container py-8 max-w-6xl">

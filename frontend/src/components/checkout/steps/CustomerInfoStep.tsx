@@ -88,11 +88,11 @@ const CustomerInfoStep: React.FC<CustomerInfoStepProps> = ({ customerInfo, onCha
           />
         </div>
         <div>
-          <Label htmlFor="state">State *</Label>
+          <Label htmlFor="province">Province *</Label>
           <Input
-            id="state"
-            value={customerInfo.state}
-            onChange={(e) => onChange({ state: e.target.value })}
+            id="province"
+            value={customerInfo.province}
+            onChange={(e) => onChange({ province: e.target.value })}
             required
           />
         </div>

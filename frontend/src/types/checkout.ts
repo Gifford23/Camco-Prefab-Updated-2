@@ -7,7 +7,7 @@ export interface CustomerInfo {
   address1: string;
   address2?: string;
   city: string;
-  state: string;
+  province: string;
   postalCode: string;
   country: string;
   notes?: string;

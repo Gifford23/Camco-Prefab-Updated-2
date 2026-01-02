@@ -9,7 +9,7 @@ export const validateCustomerInfo = (customerInfo: CustomerInfo): boolean => {
     customerInfo.phone && 
     customerInfo.address1 && 
     customerInfo.city && 
-    customerInfo.state && 
+    customerInfo.province && 
     customerInfo.postalCode && 
     customerInfo.country
   );

@@ -1,84 +1,97 @@
 // src/components/ElegantFeaturesSection.tsx (or wherever your component is located)
-import { useState } from 'react';
-import { Home, Hammer, Building, Palette, ShowerHead, Info } from 'lucide-react';
-import Lightbox from './Lightbox'; // Import the Lightbox component
+import { useState } from "react";
+import {
+  Home,
+  Hammer,
+  Building,
+  Palette,
+  ShowerHead,
+  Info,
+} from "lucide-react";
+import Lightbox from "./Lightbox"; // Import the Lightbox component
 
 const features = [
   {
-    name: 'Prefab Container',
-    description: 'Premium modular container units engineered for versatility and durability in any environment.',
+    name: "Prefab Container",
+    description:
+      "Premium modular container units engineered for versatility and durability in any environment.",
     icon: Home,
-    color: 'blue'
+    color: "blue",
   },
   {
-    name: 'Advanced Materials',
-    description: 'High-grade steel framework with eco-friendly insulation and weather-resistant composite panels.',
+    name: "Advanced Materials",
+    description:
+      "High-grade steel framework with eco-friendly insulation and weather-resistant composite panels.",
     icon: Hammer,
-    color: 'emerald'
+    color: "emerald",
   },
   {
-    name: 'Prefab Customizable Unit',
-    description: 'Modern customizable living spaces designed for comfort, style, and energy efficiency.',
+    name: "Prefab Customizable Unit",
+    description:
+      "Modern customizable living spaces designed for comfort, style, and energy efficiency.",
     icon: Building,
-    color: 'purple'
+    color: "purple",
   },
   {
-    name: 'Premium Finishes',
-    description: 'Hand-crafted details with sustainable materials and precision-engineered components.',
+    name: "Premium Finishes",
+    description:
+      "Hand-crafted details with sustainable materials and precision-engineered components.",
     icon: Palette,
-    color: 'orange'
+    color: "orange",
   },
   {
-    name: 'Portable Facilities',
-    description: 'Complete sanitation solutions with modern amenities and easy installation.',
+    name: "Portable Facilities",
+    description:
+      "Complete sanitation solutions with modern amenities and easy installation.",
     icon: ShowerHead,
-    color: 'teal'
+    color: "teal",
   },
   {
-    name: 'Quality Assurance',
-    description: 'Each unit undergoes rigorous testing to ensure structural integrity and longevity.',
+    name: "Quality Assurance",
+    description:
+      "Each unit undergoes rigorous testing to ensure structural integrity and longevity.",
     icon: Info,
-    color: 'rose'
+    color: "rose",
   },
 ];
 
 const colorClasses = {
   blue: {
-    icon: 'text-blue-600',
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
-    hover: 'hover:border-blue-400 hover:shadow-blue-100'
+    icon: "text-blue-600",
+    bg: "bg-blue-50",
+    border: "border-blue-200",
+    hover: "hover:border-blue-400 hover:shadow-blue-100",
   },
   emerald: {
-    icon: 'text-emerald-600',
-    bg: 'bg-emerald-50',
-    border: 'border-emerald-200',
-    hover: 'hover:border-emerald-400 hover:shadow-emerald-100'
+    icon: "text-emerald-600",
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+    hover: "hover:border-emerald-400 hover:shadow-emerald-100",
   },
   purple: {
-    icon: 'text-purple-600',
-    bg: 'bg-purple-50',
-    border: 'border-purple-200',
-    hover: 'hover:border-purple-400 hover:shadow-purple-100'
+    icon: "text-purple-600",
+    bg: "bg-purple-50",
+    border: "border-purple-200",
+    hover: "hover:border-purple-400 hover:shadow-purple-100",
   },
   orange: {
-    icon: 'text-orange-600',
-    bg: 'bg-orange-50',
-    border: 'border-orange-200',
-    hover: 'hover:border-orange-400 hover:shadow-orange-100'
+    icon: "text-orange-600",
+    bg: "bg-orange-50",
+    border: "border-orange-200",
+    hover: "hover:border-orange-400 hover:shadow-orange-100",
   },
   teal: {
-    icon: 'text-teal-600',
-    bg: 'bg-teal-50',
-    border: 'border-teal-200',
-    hover: 'hover:border-teal-400 hover:shadow-teal-100'
+    icon: "text-teal-600",
+    bg: "bg-teal-50",
+    border: "border-teal-200",
+    hover: "hover:border-teal-400 hover:shadow-teal-100",
   },
   rose: {
-    icon: 'text-rose-600',
-    bg: 'bg-rose-50',
-    border: 'border-rose-200',
-    hover: 'hover:border-rose-400 hover:shadow-rose-100'
-  }
+    icon: "text-rose-600",
+    bg: "bg-rose-50",
+    border: "border-rose-200",
+    hover: "hover:border-rose-400 hover:shadow-rose-100",
+  },
 };
 
 export default function ElegantFeaturesSection() {
@@ -97,22 +110,22 @@ export default function ElegantFeaturesSection() {
     {
       src: "https://camcoprefabricatedstructures.com/wp-content/uploads/2024/10/Mask-group-3.png",
       alt: "Premium prefab container unit with modern design",
-      h: 'h-64'
+      h: "h-64",
     },
     {
       src: "https://camcoprefabricatedstructures.com/wp-content/uploads/2025/03/Mask-group-34.png",
       alt: "Interior view of customizable prefab structure",
-      h: 'h-80'
+      h: "h-80",
     },
     {
       src: "https://camcoprefabricatedstructures.com/wp-content/uploads/2025/02/Copy-of-For-Final-Website-9.png",
       alt: "Advanced materials and construction details",
-      h: 'h-80'
+      h: "h-80",
     },
     {
       src: "https://camcoprefabricatedstructures.com/wp-content/uploads/2025/02/Mask-group-4-1.png",
       alt: "Complete prefab solution with premium finishes",
-      h: 'h-64'
+      h: "h-64",
     },
   ];
 
@@ -147,13 +160,26 @@ export default function ElegantFeaturesSection() {
             <div className="prose prose-lg max-w-none">
               <p className="text-xl text-gray-600 leading-relaxed">
                 Engineered for excellence, our premium prefab products offer
-                <span className="font-semibold text-gray-800"> fast, reliable construction</span> with
-                <span className="font-semibold text-gray-800"> superior durability</span> and
-                <span className="font-semibold text-gray-800"> design flexibility</span>—perfect for residential, commercial, or industrial use.
+                <span className="font-semibold text-gray-800">
+                  {" "}
+                  fast, reliable construction
+                </span>{" "}
+                with
+                <span className="font-semibold text-gray-800">
+                  {" "}
+                  superior durability
+                </span>{" "}
+                and
+                <span className="font-semibold text-gray-800">
+                  {" "}
+                  design flexibility
+                </span>
+                —perfect for residential, commercial, or industrial use.
               </p>
               <p className="text-lg text-gray-500 mt-4">
-                Every structure ensures quality, efficiency, and long-term value in every build,
-                backed by cutting-edge technology and sustainable practices.
+                Every structure ensures quality, efficiency, and long-term value
+                in every build, backed by cutting-edge technology and
+                sustainable practices.
               </p>
             </div>
 
@@ -170,11 +196,13 @@ export default function ElegantFeaturesSection() {
                     onMouseEnter={() => setHoveredFeature(index)}
                     onMouseLeave={() => setHoveredFeature(null)}
                     style={{
-                      animationDelay: `${index * 150}ms`
+                      animationDelay: `${index * 150}ms`,
                     }}
                   >
                     <div className="flex items-start space-x-4">
-                      <div className={`flex-shrink-0 p-3 rounded-xl ${colors.bg} border ${colors.border} group-hover:scale-110 transition-transform duration-300`}>
+                      <div
+                        className={`flex-shrink-0 p-3 rounded-xl ${colors.bg} border ${colors.border} group-hover:scale-110 transition-transform duration-300`}
+                      >
                         <Icon className={`w-6 h-6 ${colors.icon}`} />
                       </div>
                       <div className="flex-1 min-w-0">
