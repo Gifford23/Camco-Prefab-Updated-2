@@ -1,58 +1,60 @@
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { orders, Order, OrderStatus } from '@/data/orders';
-
-interface OrderUpdatesContextType {
-  orders: Order[];
-  updateOrderStatus: (orderId: string, newStatus: OrderStatus) => void;
-  getOrderById: (orderId: string) => Order | undefined;
-  refreshOrders: () => void;
+interface OrderUpdate {
+  id: string;
+  status: string;
+  customerName: string;
 }
 
-const OrderUpdatesContext = createContext<OrderUpdatesContextType | undefined>(undefined);
+interface OrderUpdatesContextType {
+  lastUpdate: OrderUpdate | null;
+}
 
-export const OrderUpdatesProvider = ({ children }: { children: React.ReactNode }) => {
-  const [localOrders, setLocalOrders] = useState<Order[]>(orders);
+const OrderUpdatesContext = createContext<OrderUpdatesContextType | undefined>(
+  undefined
+);
 
-  // Listen for order updates from admin panel
+export const OrderUpdatesProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const [lastUpdate, setLastUpdate] = useState<OrderUpdate | null>(null);
+  const { toast } = useToast();
+
   useEffect(() => {
-    const handleOrderUpdate = (event: CustomEvent) => {
-      const { orderId, newStatus } = event.detail;
-      updateOrderStatus(orderId, newStatus);
-    };
+    // Subscribe to INSERT events on the 'orders' table
+    const subscription = supabase
+      .channel("order-updates")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "orders" },
+        (payload) => {
+          const newOrder = payload.new as any;
 
-    window.addEventListener('orderStatusUpdated', handleOrderUpdate as EventListener);
-    
-    return () => {
-      window.removeEventListener('orderStatusUpdated', handleOrderUpdate as EventListener);
-    };
-  }, []);
+          setLastUpdate({
+            id: newOrder.id,
+            status: newOrder.status,
+            customerName: newOrder.customer_name || "Customer",
+          });
 
-  const updateOrderStatus = (orderId: string, newStatus: OrderStatus) => {
-    setLocalOrders(prevOrders => 
-      prevOrders.map(order => 
-        order.id === orderId 
-          ? { ...order, status: newStatus }
-          : order
+          toast({
+            title: "New Order Received!",
+            description: `Order #${newOrder.id} has just been placed.`,
+          });
+        }
       )
-    );
-  };
+      .subscribe();
 
-  const getOrderById = (orderId: string) => {
-    return localOrders.find(order => order.id === orderId);
-  };
-
-  const refreshOrders = () => {
-    setLocalOrders([...orders]);
-  };
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [toast]);
 
   return (
-    <OrderUpdatesContext.Provider value={{
-      orders: localOrders,
-      updateOrderStatus,
-      getOrderById,
-      refreshOrders
-    }}>
+    <OrderUpdatesContext.Provider value={{ lastUpdate }}>
       {children}
     </OrderUpdatesContext.Provider>
   );
@@ -61,7 +63,9 @@ export const OrderUpdatesProvider = ({ children }: { children: React.ReactNode }
 export const useOrderUpdates = () => {
   const context = useContext(OrderUpdatesContext);
   if (context === undefined) {
-    throw new Error('useOrderUpdates must be used within an OrderUpdatesProvider');
+    throw new Error(
+      "useOrderUpdates must be used within an OrderUpdatesProvider"
+    );
   }
   return context;
 };
