@@ -98,7 +98,10 @@ function App() {
                         element={<OrderTracking />}
                       />
                       <Route path="/admin-login" element={<AdminLogin />} />
-                      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                      <Route
+                        path="/privacy-policy"
+                        element={<PrivacyPolicy />}
+                      />
 
                       {/* Admin routes - all wrapped with ProtectedAdminRoute + AdminLayout */}
                       <Route
