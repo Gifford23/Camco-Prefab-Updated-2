@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,12 +13,13 @@ import { formatPrice, usdToPhp } from "@/lib/formatters";
 import { useCart } from "@/context/CartContext";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 
+// Update Interface to match Supabase types
 interface Product {
-  id: number;
+  id: string; // Changed to string
   name: string;
   price: number;
   category: string;
-  squareFeet: number;
+  squareFeet?: number; // Optional
   image: string;
   description: string;
 }
@@ -33,7 +33,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { isAuthenticated } = useCustomerAuth();
 
-  const handleBuyNow = (productId: number) => {
+  const handleBuyNow = (productId: string) => {
     if (!isAuthenticated) {
       toast("Please login to continue with your purchase");
       navigate("/login");
@@ -44,7 +44,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     toast("Redirecting to product detail page");
   };
 
-  const handleViewDetails = (productId: number) => {
+  const handleViewDetails = (productId: string) => {
     navigate(`/product/${productId}`);
   };
 
@@ -90,7 +90,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </div>
         <div className="flex items-center mt-1">
           <span className="text-sm text-gray-500">
-            {product.category} · {product.squareFeet} sq ft
+            {product.category} {product.squareFeet ? `· ${product.squareFeet} sq ft` : ''}
           </span>
         </div>
       </CardHeader>

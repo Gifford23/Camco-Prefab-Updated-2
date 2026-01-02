@@ -5,10 +5,9 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+import { supabase } from "@/lib/supabase"; // Import Supabase client
 import { FcGoogle } from "react-icons/fc";
+import { DatabaseSeeder } from "@/components/admin/DatabaseSeeder";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -44,47 +43,29 @@ const Login = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const auth = getAuth();
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      // Check if user exists in Firestore
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      // If user doesn't exist, create a new document
-      if (!userDoc.exists()) {
-        await setDoc(userDocRef, {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-          role: "customer", // Default role
-        });
-      }
-
-      // Navigate to home page after successful login
-      navigate("/");
-
-      toast({
-        title: "Login successful",
-        description: `Welcome ${user.displayName || "User"}!`,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
       });
-    } catch (error) {
+
+      if (error) throw error;
+
+      // Note: Supabase will redirect the user to Google for authentication.
+      // They will return to the URL specified in 'redirectTo'.
+    } catch (error: any) {
       console.error("Google sign in error:", error);
       toast({
         title: "Google Sign In Failed",
         description:
-          error instanceof Error
-            ? error.message
-            : "An error occurred during Google sign in.",
+          error.message || "An error occurred during Google sign in.",
         variant: "destructive",
       });
     }
   };
+
+  // ... keep your existing imports and logic above ...
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-blue-500 via-blue-500 to-blue-300 flex items-center relative overflow-hidden">
@@ -149,6 +130,12 @@ const Login = () => {
         {/* Right side form */}
         <div className="flex justify-center p-4 transform transition-all duration-1000 ease-out animate-in slide-in-from-right-10 delay-300">
           <div className="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl shadow-black/20 hover:shadow-3xl hover:shadow-black/30 transition-all duration-500">
+            {/* --- TEMPORARY DATABASE SEEDER BUTTON --- */}
+            <div className="mb-6">
+              <DatabaseSeeder />
+            </div>
+            {/* ---------------------------------------- */}
+
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-white mb-2">Sign In</h2>
               <p className="text-white/70">
@@ -157,6 +144,7 @@ const Login = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* ... existing form fields (email, password, etc) ... */}
               <div className="space-y-2">
                 <label
                   htmlFor="email"

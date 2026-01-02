@@ -1,9 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  initializeNotificationHandler,
-  cleanupNotificationHandler,
-} from "@/utils/notificationHandler";
 import { supabase } from "@/lib/supabase";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -16,32 +12,12 @@ interface Customer {
   role?: string;
 }
 
-interface CustomerNotification {
-  id: string;
-  orderId: string;
-  message: string;
-  type:
-    | "order_update"
-    | "payment_confirmed"
-    | "contract_ready"
-    | "delivery_scheduled";
-  timestamp: string;
-  read: boolean;
-  fromPersonnel?: string;
-}
-
 interface CustomerAuthContextType {
   customer: Customer | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  notifications: CustomerNotification[];
-  unreadNotifications: number;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
-  markNotificationAsRead: (notificationId: string) => void;
-  addNotification: (
-    notification: Omit<CustomerNotification, "id" | "timestamp">
-  ) => void;
 }
 
 const CustomerAuthContext = createContext<CustomerAuthContextType | undefined>(
@@ -56,12 +32,9 @@ export const CustomerAuthProvider = ({
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [notifications, setNotifications] = useState<CustomerNotification[]>(
-    []
-  );
   const { toast } = useToast();
 
-  // Handle authentication state changes
+  // 1. Listen for Auth Changes (Login/Logout)
   useEffect(() => {
     // Check active session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -82,8 +55,8 @@ export const CustomerAuthProvider = ({
 
   const handleSession = async (user: SupabaseUser | null) => {
     if (user) {
-      // User is signed in
-      // Fetch extra profile data from 'profiles' table
+      // User is logged in!
+      // Try to get extra details from the 'profiles' table
       const { data: profile } = await supabase
         .from("profiles")
         .select("*")
@@ -95,72 +68,23 @@ export const CustomerAuthProvider = ({
       const lastName =
         user.user_metadata?.last_name || profile?.last_name || "";
 
-      const customerData: Customer = {
+      setCustomer({
         id: user.id,
         email: user.email || null,
         firstName,
         lastName,
         displayName: `${firstName} ${lastName}`.trim(),
         role: profile?.role || "customer",
-      };
-
-      setCustomer(customerData);
+      });
       setIsAuthenticated(true);
-
-      sessionStorage.setItem(
-        "customerAuthenticated",
-        JSON.stringify({
-          id: user.id,
-          email: user.email,
-          firstName,
-          lastName,
-        })
-      );
     } else {
-      // User is signed out
+      // User is logged out
       setCustomer(null);
       setIsAuthenticated(false);
-      sessionStorage.removeItem("customerAuthenticated");
     }
   };
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      initializeNotificationHandler(addNotification);
-    } else {
-      cleanupNotificationHandler();
-    }
-    return () => cleanupNotificationHandler();
-  }, [isAuthenticated]);
-
-  const addNotification = (
-    notificationData: Omit<CustomerNotification, "id" | "timestamp">
-  ) => {
-    const newNotification: CustomerNotification = {
-      ...notificationData,
-      id: `n${Date.now()}`,
-      timestamp: new Date().toISOString(),
-    };
-
-    setNotifications((prev) => [newNotification, ...prev]);
-    toast({
-      title: "New Notification",
-      description: notificationData.message,
-    });
-  };
-
-  const markNotificationAsRead = (notificationId: string) => {
-    setNotifications((prev) =>
-      prev.map((notification) =>
-        notification.id === notificationId
-          ? { ...notification, read: true }
-          : notification
-      )
-    );
-  };
-
-  const unreadNotifications = notifications.filter((n) => !n.read).length;
-
+  // 2. Login Function
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -170,12 +94,17 @@ export const CustomerAuthProvider = ({
       });
 
       if (error) throw error;
+
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
       return true;
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
         title: "Login Failed",
-        description: error.message || "Failed to log in.",
+        description: error.message || "Invalid email or password",
         variant: "destructive",
       });
       return false;
@@ -184,40 +113,32 @@ export const CustomerAuthProvider = ({
     }
   };
 
+  // 3. Logout Function
   const logout = async (): Promise<void> => {
     try {
       setIsLoading(true);
       await supabase.auth.signOut();
       toast({
-        title: "Logged out successfully",
-        description: "You have been logged out.",
+        title: "Logged out",
+        description: "See you next time!",
       });
     } catch (error: any) {
       console.error("Logout error:", error);
-      toast({
-        title: "Logout Failed",
-        description: "An error occurred while logging out.",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const value = {
-    customer,
-    isAuthenticated,
-    isLoading,
-    notifications,
-    unreadNotifications,
-    login,
-    logout,
-    markNotificationAsRead,
-    addNotification,
-  };
-
   return (
-    <CustomerAuthContext.Provider value={value}>
+    <CustomerAuthContext.Provider
+      value={{
+        customer,
+        isAuthenticated,
+        isLoading,
+        login,
+        logout,
+      }}
+    >
       {!isLoading && children}
     </CustomerAuthContext.Provider>
   );
