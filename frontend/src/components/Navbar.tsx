@@ -1,324 +1,178 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, X, ShoppingCart, User, LogOut, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge"; // MOD: Imported Badge
-
+import { useCustomerAuth } from "@/context/CustomerAuthContext"; // Use the NEW context
+import { useCart } from "@/context/CartContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, Package, LogOut } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { useCart } from "@/context/CartContext";
-import { useCustomerAuth } from "@/context/CustomerAuthContext";
-import CustomerNotifications from "@/components/customer/CustomerNotifications";
-import logo from "@/assets/logo.png";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  // Use the correct hook that connects to Supabase
   const { customer, isAuthenticated, logout } = useCustomerAuth();
+  const { getTotalItems } = useCart();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
   };
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  };
-
-  const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-    // Navigate to home if not already there
-    if (window.location.pathname !== '/') {
-      window.location.href = '/';
-    }
-  };
+  const navLinks = [
+    { name: "Home", path: "/" },
+    { name: "Shop", path: "/shop" },
+    { name: "Projects", path: "/projects" },
+    { name: "About", path: "/about" },
+    { name: "Contact", path: "/contact" },
+  ];
 
   return (
-    <nav className="bg-white/80 shadow-sm sticky top-0 z-50 transition-all duration-300 backdrop-blur-sm">
-      <div className="container mx-auto py-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <Link 
-              to="/" 
-              className="flex items-center gap-4"
-              onClick={scrollToTop}
-            >
-              <img
-                src={logo}
-                alt="Camco Prefab Logo"
-                className="h-12 w-auto object-contain"
-              />
-              <span className="text-2xl font-bold text-blue-950 transition-colors duration-300 hover:text-blue-600">
-                Camco Prefab
-              </span>
-            </Link>
-          </div>
+    <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-20">
+          {/* Logo */}
+          <Link to="/" className="flex-shrink-0 flex items-center gap-2">
+            <img
+              src="/photos/logo/camco logo crop.png"
+              alt="Camco Logo"
+              className="h-10 w-auto object-contain"
+            />
+            <span className="font-bold text-xl tracking-tight text-blue-900 hidden sm:block">
+              Camco Prefab
+            </span>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link
-              to="/"
-              className="text-gray-700 hover:text-prefab-600 font-medium transition-all duration-300 hover:scale-105 story-link"
-            >
-              Home
-            </Link>
-            <Link
-              to="/shop"
-              className="text-gray-700 hover:text-prefab-600 font-medium transition-all duration-300 hover:scale-105 story-link"
-            >
-              Shop
-            </Link>
-            <Link
-              to="/projects"
-              className="text-gray-700 hover:text-prefab-600 font-medium transition-all duration-300 hover:scale-105 story-link"
-            >
-              Projects
-            </Link>
-            <Link
-              to="/about"
-              className="text-gray-700 hover:text-prefab-600 font-medium transition-all duration-300 hover:scale-105 story-link"
-            >
-              About Us
-            </Link>
-            <Link
-              to="/contact"
-              className="text-gray-700 hover:text-prefab-600 font-medium transition-all duration-300 hover:scale-105 story-link"
-            >
-              Contact
-            </Link>
-            <Link
-              to="/faq"
-              className="text-gray-700 hover:text-prefab-600 font-medium transition-all duration-300 hover:scale-105 story-link"
-            >
-              FAQ
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                className="text-gray-600 hover:text-blue-600 font-medium transition-colors duration-200"
+              >
+                {link.name}
+              </Link>
+            ))}
           </div>
 
+          {/* Right Side Icons */}
           <div className="hidden md:flex items-center space-x-4">
-            {isAuthenticated && customer ? (
-              <div className="flex items-center space-x-3">
-                {/* Bell Icon */}
-                <div className="transition-all duration-300 hover:scale-110">
-                  <CustomerNotifications />
-                </div>
+            {/* Cart Icon */}
+            <Link
+              to="/checkout"
+              className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              <ShoppingCart className="h-6 w-6" />
+              {getTotalItems() > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full">
+                  {getTotalItems()}
+                </span>
+              )}
+            </Link>
 
-                {/* Profile Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="relative h-10 w-10 rounded-full transition-all duration-300 hover:scale-110"
-                    >
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-prefab-600 text-white">
-                          {getInitials(customer.firstName, customer.lastName)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-56 bg-white border shadow-lg animate-scale-in"
-                    align="end"
-                    forceMount
-                  >
-                    <div className="flex items-center justify-start gap-2 p-2">
-                      <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-medium">
-                          {customer.firstName} {customer.lastName}
-                        </p>
-                        <p className="w-[200px] truncate text-sm text-muted-foreground">
-                          {customer.email}
-                        </p>
-                      </div>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/order-history"
-                        className="flex items-center transition-colors duration-200"
-                      >
-                        <Package className="mr-2 h-4 w-4" />
-                        <span>My Orders</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        to="/customer-dashboard"
-                        className="flex items-center transition-colors duration-200"
-                      >
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={logout}
-                      className="text-red-600 transition-colors duration-200"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            ) : (
-              <>
-                <Link to="/login">
+            {/* User Profile / Login Button */}
+            {isAuthenticated && customer ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button
-                    variant="outline"
-                    className="border-prefab-500 text-prefab-600 hover:bg-prefab-50 transition-all duration-300 hover:scale-105"
+                    variant="ghost"
+                    className="flex items-center gap-2 pl-2 pr-4 rounded-full hover:bg-gray-100"
                   >
-                    Login
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="" /> {/* Add photoURL if available */}
+                      <AvatarFallback className="bg-blue-100 text-blue-700">
+                        {customer.firstName?.[0]}
+                        {customer.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium text-sm text-gray-700">
+                      {customer.firstName}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
                   </Button>
-                </Link>
-                <Link to="/signup">
-                  <Button className="bg-prefab-600 hover:bg-prefab-700 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                    Sign Up
-                  </Button>
-                </Link>
-              </>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem
+                    onClick={() => navigate("/customer-dashboard")}
+                  >
+                    <User className="mr-2 h-4 w-4" /> Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/login">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6">
+                  Sign In
+                </Button>
+              </Link>
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              onClick={toggleMenu}
-              size="icon"
-              className="transition-transform duration-300 hover:scale-110"
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-gray-600 hover:text-blue-600 p-2"
             >
-              {isMenuOpen ? (
+              {isOpen ? (
                 <X className="h-6 w-6" />
               ) : (
                 <Menu className="h-6 w-6" />
               )}
-            </Button>
+            </button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 animate-fade-in">
-            <div className="flex flex-col space-y-3">
+      {/* Mobile Menu (Simplified) */}
+      {isOpen && (
+        <div className="md:hidden bg-white border-t border-gray-100 absolute w-full">
+          <div className="px-4 pt-2 pb-4 space-y-1">
+            {navLinks.map((link) => (
               <Link
-                to="/"
-                className="text-gray-700 hover:text-prefab-600 font-medium px-3 py-2 rounded-md hover:bg-gray-50 transition-all duration-300"
-                onClick={(e) => {
-                  scrollToTop(e);
-                  setIsMenuOpen(false);
-                }}
+                key={link.name}
+                to={link.path}
+                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md"
+                onClick={() => setIsOpen(false)}
               >
-                Home
+                {link.name}
               </Link>
-              <Link
-                to="/shop"
-                className="text-gray-700 hover:text-prefab-600 font-medium px-3 py-2 rounded-md hover:bg-gray-50 transition-all duration-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Shop
-              </Link>
-              <Link
-                to="/projects"
-                className="text-gray-700 hover:text-prefab-600 font-medium px-3 py-2 rounded-md hover:bg-gray-50 transition-all duration-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Projects
-              </Link>
-              <Link
-                to="/about"
-                className="text-gray-700 hover:text-prefab-600 font-medium px-3 py-2 rounded-md hover:bg-gray-50 transition-all duration-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About Us
-              </Link>
-              <Link
-                to="/contact"
-                className="text-gray-700 hover:text-prefab-600 font-medium px-3 py-2 rounded-md hover:bg-gray-50 transition-all duration-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </Link>
-              <Link
-                to="/faq"
-                className="text-gray-700 hover:text-prefab-600 font-medium px-3 py-2 rounded-md hover:bg-gray-50 transition-all duration-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                FAQ
-              </Link>
-
-              {isAuthenticated && customer ? (
-                <>
-                  <div className="px-3 py-2 border-t">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <CustomerNotifications />
-                      <div>
-                        <p className="font-medium">
-                          {customer.firstName} {customer.lastName}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {customer.email}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <Link
-                    to="/order-history"
-                    className="text-gray-700 hover:text-prefab-600 font-medium px-3 py-2 rounded-md hover:bg-gray-50 flex items-center transition-all duration-300"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Package className="mr-2 h-4 w-4" />
-                    My Orders
-                  </Link>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setIsMenuOpen(false);
-                    }}
-                    className="text-red-600 font-medium px-3 py-2 rounded-md hover:bg-gray-50 flex items-center w-full text-left transition-all duration-300"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
-                  </button>
-                </>
+            ))}
+            <div className="pt-4 border-t border-gray-100 mt-2">
+              {isAuthenticated ? (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-red-600"
+                  onClick={() => {
+                    handleLogout();
+                    setIsOpen(false);
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                </Button>
               ) : (
-                <div className="flex space-x-2 pt-2">
-                  <Link
-                    to="/login"
-                    className="w-1/2"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full border-prefab-500 text-prefab-600 hover:bg-prefab-50 transition-all duration-300"
-                    >
-                      Login
-                    </Button>
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="w-1/2"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Button className="w-full bg-prefab-600 hover:bg-prefab-700 text-white transition-all duration-300">
-                      Sign Up
-                    </Button>
-                  </Link>
-                </div>
+                <Link to="/login" onClick={() => setIsOpen(false)}>
+                  <Button className="w-full bg-blue-600 text-white">
+                    Sign In
+                  </Button>
+                </Link>
               )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </nav>
   );
 };
